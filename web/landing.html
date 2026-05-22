@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentMail — an agent-native mailbox</title>
+  <meta name="description" content="AgentMail is an agent-native mailbox. Email, redesigned for a world where most of your inbound comes from software." />
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --ink: #1a1a1f;
+      --ink-soft: #4a4a55;
+      --ink-mute: #76767f;
+      --line: #e8e6df;
+      --line-strong: #d6d3c8;
+      --card: #ffffff;
+      --accent: #3f3cbb;
+      --accent-soft: #ecebfb;
+      --warn: #b45309;
+      --warn-soft: #fef3c7;
+      --ok: #166534;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --serif: ui-serif, Georgia, "Times New Roman", serif;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Top nav */
+    nav.top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    nav.top .brand {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.01em;
+    }
+    nav.top .links { display: flex; gap: 20px; font-size: 14px; color: var(--ink-soft); }
+    nav.top .links a { color: var(--ink-soft); }
+
+    /* Hero */
+    .hero { padding: 80px 0 64px; text-align: left; }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: 64px;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      margin: 0 0 20px;
+      font-weight: 700;
+    }
+    .hero .tagline {
+      font-size: 21px;
+      color: var(--ink-soft);
+      max-width: 640px;
+      margin: 0 0 36px;
+      line-height: 1.45;
+    }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: var(--sans);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 120ms, border 120ms, transform 80ms;
+      text-decoration: none;
+    }
+    .btn:hover { text-decoration: none; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #322fa3; }
+    .btn-secondary { background: var(--card); color: var(--ink); border-color: var(--line-strong); }
+    .btn-secondary:hover { background: #f3f1e9; }
+    .btn-small { padding: 6px 12px; font-size: 13px; }
+
+    /* Section */
+    section { padding: 64px 0; border-top: 1px solid var(--line); }
+    section h2 {
+      font-family: var(--serif);
+      font-size: 32px;
+      letter-spacing: -0.015em;
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+    section .lede { color: var(--ink-soft); font-size: 17px; margin: 0 0 32px; max-width: 640px; }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+    }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; }
+    .card .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    /* Flow diagram */
+    .flow {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 28px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--ink);
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .flow .accent { color: var(--accent); font-weight: 600; }
+    .flow .mute { color: var(--ink-mute); }
+
+    /* For humans / agents */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 28px;
+    }
+    .panel h3 {
+      margin: 0 0 6px;
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .panel .sub { color: var(--ink-soft); margin: 0 0 16px; font-size: 15px; }
+    .panel ul { margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 14.5px; }
+    .panel ul li { margin-bottom: 6px; }
+    .panel .links { margin-top: 16px; font-size: 14px; }
+    .panel .links a { display: inline-block; margin-right: 14px; }
+
+    /* Register form */
+    .form-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 28px;
+    }
+    .form-card h3 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+    .form-card .help { color: var(--ink-mute); font-size: 13px; margin: 0 0 20px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+    .field input, .field select {
+      font-family: var(--sans);
+      font-size: 14px;
+      padding: 9px 11px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 120ms, box-shadow 120ms;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field .hint { font-size: 12px; color: var(--ink-mute); }
+    .field code { font-family: var(--mono); font-size: 12px; background: #f3f1e9; padding: 1px 4px; border-radius: 3px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .result {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+    .result.show { display: block; }
+    .result.ok {
+      background: var(--warn-soft);
+      border: 1px solid #fcd34d;
+      color: #78350f;
+    }
+    .result.err {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #7f1d1d;
+    }
+    .result h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+    .secret-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      background: #fff;
+      border: 1px dashed #d97706;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .secret-row code {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 13px;
+      word-break: break-all;
+      color: #111;
+    }
+
+    /* Table of agents */
+    table.agents {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin-top: 12px;
+    }
+    table.agents th, table.agents td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    table.agents th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-mute);
+      font-weight: 600;
+    }
+    table.agents td { color: var(--ink-soft); font-family: var(--mono); font-size: 12.5px; }
+    table.agents td.name { font-family: var(--sans); color: var(--ink); }
+    table.agents .trust {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f3f1e9;
+      color: var(--ink-soft);
+    }
+    table.agents .trust.trusted, table.agents .trust.partner { background: #d1fae5; color: var(--ok); }
+    table.agents .trust.unknown { background: #f3f1e9; color: var(--ink-mute); }
+    table.agents .trust.known { background: var(--accent-soft); color: var(--accent); }
+
+    /* Footer */
+    footer {
+      margin-top: 32px;
+      padding: 40px 0 64px;
+      border-top: 1px solid var(--line);
+      color: var(--ink-mute);
+      font-size: 13.5px;
+    }
+    footer .row-foot {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    footer a { color: var(--ink-soft); }
+    footer .small { font-size: 12px; color: var(--ink-mute); margin-top: 12px; }
+
+    /* Responsive */
+    @media (max-width: 760px) {
+      .hero { padding: 48px 0 32px; }
+      .hero h1 { font-size: 42px; }
+      .hero .tagline { font-size: 18px; }
+      .cards { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+      section { padding: 40px 0; }
+      section h2 { font-size: 26px; }
+      .flow { font-size: 11.5px; padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="top">
+      <div class="brand">AgentMail</div>
+      <div class="links">
+        <a href="#how">How it works</a>
+        <a href="#humans">For humans</a>
+        <a href="#agents">For agents</a>
+        <a href="#register">Register</a>
+        <a href="/inbox">Inbox</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+      <h1>AgentMail</h1>
+      <p class="tagline">An agent-native mailbox. Email, redesigned for a world where most of your inbound comes from software.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/inbox">Open my inbox</a>
+        <a class="btn btn-secondary" href="#register">I'm an agent &mdash; register</a>
+      </div>
+    </header>
+
+    <!-- WHAT IS THIS -->
+    <section id="what">
+      <h2>What is this?</h2>
+      <p class="lede">A mailbox where every inbound message &mdash; from humans or from agents &mdash; is read, classified, and routed before it touches your attention.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="pill">Triage</span>
+          <h3>Your inbox, triaged by an agent</h3>
+          <p>Every inbound message is classified, lane-routed, drafted-when-appropriate, and audit-logged. You see what needs you, not everything.</p>
+        </div>
+        <div class="card">
+          <span class="pill">Five lanes</span>
+          <h3>Five lanes, not infinite unread</h3>
+          <p>Quarantine, filed, auto-action, draft-for-review, escalated. Each message lands in exactly one. No more bottomless scroll.</p>
+        </div>
+        <div class="card">
+          <span class="pill">Agent-native</span>
+          <h3>Agents are first-class senders</h3>
+          <p>Structured HMAC-authed POST, not just SMTP. Per-agent identity, per-agent rate limits, per-agent trust levels.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+      <h2>How it works</h2>
+      <p class="lede">One pipeline. Five lanes. Every step audited. A 60-second undo window before anything leaves the building.</p>
+      <div class="flow"><span class="mute">inbound message</span> <span class="accent">&#9656;</span> <span class="mute">ingest</span> <span class="accent">&#9656;</span> <span class="mute">classify</span> <span class="accent">&#9656;</span> <span class="mute">route to lane 1..5</span>
+                                              &#9474;
+                                              &#9660; <span class="mute">(lane 4)</span>
+                                          <span class="accent">draft for human</span> <span class="accent">&#9656;</span> <span class="mute">approve</span> <span class="accent">&#9656;</span> <span class="mute">send (60s undo)</span>
+                                              &#9474;
+                                              &#9660; <span class="mute">(every step)</span>
+                                          <span class="accent">audit log</span></div>
+    </section>
+
+    <!-- FOR HUMANS / FOR AGENTS -->
+    <section id="humans">
+      <h2>Built for both sides</h2>
+      <p class="lede">A mailbox is a contract between a sender and an owner. AgentMail makes that contract explicit on both ends.</p>
+      <div class="two-col">
+        <div class="panel">
+          <h3>For humans</h3>
+          <p class="sub">You own a mailbox.</p>
+          <ul>
+            <li>Only review what needs you &mdash; Lane 4 (drafts) and Lane 5 (escalated).</li>
+            <li>Everything else is filed, auto-actioned, or quarantined for you.</li>
+            <li>Full audit log of every classification, draft, and send.</li>
+            <li>60-second undo window before any outbound message leaves.</li>
+          </ul>
+          <div class="links">
+            <a href="https://github.com/mariagorskikh/agentmail/blob/main/README.md">Self-host &rarr;</a>
+            <a href="/inbox">Open inbox &rarr;</a>
+          </div>
+        </div>
+
+        <div class="panel" id="agents">
+          <h3>For agents</h3>
+          <p class="sub">Send structured messages to humans without burning email reputation.</p>
+          <ul>
+            <li>HMAC authentication &mdash; no SMTP, no SPF gymnastics.</li>
+            <li>Per-agent rate limits, scopes, and trust levels.</li>
+            <li>Predictable lane assignment based on topic + trust.</li>
+            <li>Poll <code>/api/v1/agent/messages/{id}</code> for status &mdash; received, drafted, sent, rejected.</li>
+            <li>The human is always in the loop for anything that matters.</li>
+          </ul>
+          <div class="links">
+            <a href="/SKILL.md">SKILL.md &rarr;</a>
+            <a href="/.well-known/agentmail.json">Public mailbox card &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="register">
+      <h2>Register an agent</h2>
+      <p class="lede">Mailbox owners issue agent keys. Each key has its own identity, trust level, and rate budget. The secret is shown <em>once</em>, at creation.</p>
+
+      <div class="form-wrap">
+        <div class="form-card">
+          <h3>Owner authentication</h3>
+          <p class="help">Paste your API token. We store it locally in your browser so you don't have to re-enter it.</p>
+          <div class="field">
+            <label for="adminToken">API token</label>
+            <input id="adminToken" type="password" placeholder="dev-token-please-change-me-..." autocomplete="off" />
+            <div class="hint">Sent as <code>Authorization: Bearer &lt;token&gt;</code>. Kept in <code>localStorage</code> as <code>am_admin_token</code>.</div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3>New agent</h3>
+          <p class="help">Each agent gets a stable <code>agent_id</code>, a display name, and a freshly generated secret.</p>
+          <form id="registerForm">
+            <div class="field">
+              <label for="agentId">agent_id</label>
+              <input id="agentId" type="text" required pattern="^[a-z0-9][a-z0-9-]{2,40}$" placeholder="acme-scheduler" />
+              <div class="hint">Lowercase, digits, hyphens. 3&ndash;41 chars. Must start alphanumeric.</div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="displayName">display_name</label>
+                <input id="displayName" type="text" required maxlength="120" placeholder="Acme Scheduler" />
+              </div>
+              <div class="field">
+                <label for="operatorEmail">operator_email <span class="hint">(optional)</span></label>
+                <input id="operatorEmail" type="email" placeholder="ops@acme.example" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="trustLevel">trust_level</label>
+              <select id="trustLevel">
+                <option value="unknown" selected>unknown</option>
+                <option value="known">known</option>
+                <option value="trusted">trusted</option>
+                <option value="partner">partner</option>
+              </select>
+              <div class="hint">Higher trust = more aggressive lane routing. Start with <code>unknown</code>.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create agent</button>
+          </form>
+
+          <div id="result" class="result"></div>
+        </div>
+
+        <div class="form-card">
+          <h3>My agents</h3>
+          <p class="help">List active agents on this mailbox. Secrets are <em>not</em> shown &mdash; only the key prefix.</p>
+          <button id="listBtn" type="button" class="btn btn-secondary btn-small">List agents</button>
+          <div id="agentsTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="row-foot">
+        <div>Built per <a href="https://github.com/mariagorskikh/agentmail/blob/main/AGENT_MAILBOX_SPEC.md">AGENT_MAILBOX_SPEC.md</a>.</div>
+        <div>
+          <a href="https://github.com/mariagorskikh/agentmail">GitHub</a> &middot;
+          <a href="/SKILL.md">SKILL.md</a> &middot;
+          <a href="/.well-known/agentmail.json">/.well-known/agentmail.json</a>
+        </div>
+      </div>
+      <div class="small">Single-user MVP. See <a href="https://github.com/mariagorskikh/agentmail/blob/main/FUTURE_WORK.md">FUTURE_WORK.md</a> for what's next.</div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var tokenInput = document.getElementById('adminToken');
+      var savedToken = localStorage.getItem('am_admin_token') || '';
+      if (savedToken) tokenInput.value = savedToken;
+      tokenInput.addEventListener('input', function () {
+        localStorage.setItem('am_admin_token', tokenInput.value.trim());
+      });
+
+      var form = document.getElementById('registerForm');
+      var result = document.getElementById('result');
+
+      function showResult(kind, html) {
+        result.className = 'result show ' + kind;
+        result.innerHTML = html;
+      }
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+        });
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var token = tokenInput.value.trim();
+        if (!token) {
+          showResult('err', '<h4>Missing API token</h4>Paste your token above before registering an agent.');
+          return;
+        }
+        var body = {
+          agent_id: document.getElementById('agentId').value.trim(),
+          display_name: document.getElementById('displayName').value.trim(),
+          trust_level: document.getElementById('trustLevel').value,
+        };
+        var opEmail = document.getElementById('operatorEmail').value.trim();
+        if (opEmail) body.operator_email = opEmail;
+
+        try {
+          var resp = await fetch('/api/v1/admin/agents', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token,
+            },
+            body: JSON.stringify(body),
+          });
+          var data = await resp.json().catch(function () { return {}; });
+          if (!resp.ok) {
+            showResult('err', '<h4>Could not create agent</h4>' + escapeHtml(data.error || ('HTTP ' + resp.status)) + (data.detail ? '<br><code>' + escapeHtml(JSON.stringify(data.detail)) + '</code>' : ''));
+            return;
+          }
+          var agent = data.agent || {};
+          var secret = agent.secret || '';
+          showResult('ok',
+            '<h4>Agent created &mdash; copy the secret now</h4>' +
+            'This is the <strong>only</strong> time the secret will be shown. ' +
+            'Store it somewhere safe; the server keeps only a hash.' +
+            '<div class="secret-row">' +
+              '<code id="secretVal">' + escapeHtml(secret) + '</code>' +
+              '<button type="button" class="btn btn-secondary btn-small" id="copyBtn">Copy</button>' +
+            '</div>' +
+            '<div style="margin-top:10px;font-size:13px;color:#78350f;">' +
+              '<strong>agent_id:</strong> <code>' + escapeHtml(agent.agent_id || '') + '</code><br>' +
+              '<strong>key_prefix:</strong> <code>' + escapeHtml(agent.key_prefix || '') + '</code><br>' +
+              '<strong>trust_level:</strong> <code>' + escapeHtml(agent.trust_level || '') + '</code>' +
+            '</div>'
+          );
+          var copyBtn = document.getElementById('copyBtn');
+          if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+              navigator.clipboard.writeText(secret).then(function () {
+                copyBtn.textContent = 'Copied';
+                setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1500);
+              }, function () {
+                copyBtn.textContent = 'Copy failed';
+              });
+            });
+          }
+          form.reset();
+          document.getElementById('trustLevel').value = 'unknown';
+        } catch (err) {
+          showResult('err', '<h4>Network error</h4>' + escapeHtml(err && err.message ? err.message : String(err)));
+        }
+      });
+
+      var listBtn = document.getElementById('listBtn');
+      var agentsTableEl = document.getElementById('agentsTable');
+      listBtn.addEventListener('click', async function () {
+        var token = tokenInput.value.trim();
+        if (!token) {
+          agentsTableEl.innerHTML = '<div style="margin-top:12px;font-size:13px;color:#7f1d1d;">Paste your API token above first.</div>';
+          return;
+        }
+        try {
+          var resp = await fetch('/api/v1/admin/agents', {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          var data = await resp.json().catch(function () { return {}; });
+          if (!resp.ok) {
+            agentsTableEl.innerHTML = '<div style="margin-top:12px;font-size:13px;color:#7f1d1d;">Could not list agents: ' + escapeHtml(data.error || ('HTTP ' + resp.status)) + '</div>';
+            return;
+          }
+          var agents = data.agents || [];
+          if (agents.length === 0) {
+            agentsTableEl.innerHTML = '<div style="margin-top:12px;font-size:13px;color:#76767f;">No agents registered yet.</div>';
+            return;
+          }
+          var rows = agents.map(function (a) {
+            var trust = a.trust_level || 'unknown';
+            var created = a.created_at ? new Date(a.created_at).toISOString().slice(0, 19).replace('T', ' ') : '';
+            var last = a.last_used_at ? new Date(a.last_used_at).toISOString().slice(0, 19).replace('T', ' ') : '—';
+            return '<tr>' +
+              '<td>' + escapeHtml(a.agent_id || '') + '</td>' +
+              '<td class="name">' + escapeHtml(a.display_name || '') + '</td>' +
+              '<td><span class="trust ' + escapeHtml(trust) + '">' + escapeHtml(trust) + '</span></td>' +
+              '<td>' + escapeHtml(a.key_prefix || '') + '</td>' +
+              '<td>' + escapeHtml(created) + '</td>' +
+              '<td>' + escapeHtml(last) + '</td>' +
+            '</tr>';
+          }).join('');
+          agentsTableEl.innerHTML =
+            '<table class="agents">' +
+              '<thead><tr>' +
+                '<th>agent_id</th><th>display name</th><th>trust</th>' +
+                '<th>key prefix</th><th>created</th><th>last used</th>' +
+              '</tr></thead>' +
+              '<tbody>' + rows + '</tbody>' +
+            '</table>';
+        } catch (err) {
+          agentsTableEl.innerHTML = '<div style="margin-top:12px;font-size:13px;color:#7f1d1d;">Network error: ' + escapeHtml(err && err.message ? err.message : String(err)) + '</div>';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
