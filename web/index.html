@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentMail</title>
+  <link rel="stylesheet" href="/web/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">AgentMail</div>
+    <div id="setup-status"></div>
+  </header>
+  <main id="app">
+    <aside id="sidebar">
+      <nav class="tabs">
+        <button class="tab" data-tab="pending" data-lane="4">Pending Review</button>
+        <button class="tab" data-tab="escalated" data-lane="5">Escalated</button>
+        <button class="tab" data-tab="all">All Open</button>
+        <button class="tab" data-tab="filed" data-lane="2">Filed</button>
+        <button class="tab" data-tab="quarantined" data-lane="1">Quarantined</button>
+        <button class="tab" data-tab="audit">Audit Log</button>
+      </nav>
+      <div id="thread-list"></div>
+    </aside>
+    <section id="main-view">
+      <div id="setup-banner" hidden>
+        <p>Enter your API token to connect:</p>
+        <input id="token-input" placeholder="API token" />
+        <button id="token-save">Save</button>
+      </div>
+      <div id="empty-state">Select a thread on the left.</div>
+      <div id="thread-detail" hidden></div>
+      <div id="audit-view" hidden></div>
+    </section>
+  </main>
+  <script src="/web/app.js"></script>
+</body>
+</html>

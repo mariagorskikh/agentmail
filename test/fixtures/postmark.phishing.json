@@ -1,0 +1,26 @@
+{
+  "FromName": "Account Security",
+  "From": "security@paypaI-secure.example",
+  "FromFull": { "Email": "security@paypaI-secure.example", "Name": "Account Security" },
+  "To": "maria.gorskikh1@gmail.com",
+  "ToFull": [{ "Email": "maria.gorskikh1@gmail.com", "Name": "" }],
+  "Cc": "",
+  "CcFull": [],
+  "Bcc": "",
+  "BccFull": [],
+  "OriginalRecipient": "maria.gorskikh1@gmail.com",
+  "Subject": "URGENT: Unauthorized login attempt — verify your account now",
+  "MessageID": "01HQ-DEMO-PHISHING",
+  "ReplyTo": "",
+  "MailboxHash": "",
+  "Date": "Thu, 22 May 2026 03:14:00 -0400",
+  "TextBody": "Dear Customer,\n\nWe have detected unusual activity on your account. An unauthorized login attempt was made from an unrecognized device.\n\nURGENT ACTION REQUIRED: You must verify your account immediately to prevent suspension. Click here to confirm your password and avoid account closure:\n\nhttp://paypaI-secure.example/verify\n\nIf you do not act within 24 hours, your account will be permanently suspended.\n\nThank you,\nPayPal Security Team",
+  "HtmlBody": "<p>Dear Customer,</p><p>URGENT: <a href=\"http://paypaI-secure.example/verify\">verify your account</a></p>",
+  "StrippedTextReply": "",
+  "Tag": "",
+  "Headers": [
+    { "Name": "Message-ID", "Value": "<phish-01@paypaI-secure.example>" },
+    { "Name": "Authentication-Results", "Value": "spf=fail dkim=fail dmarc=fail" }
+  ],
+  "Attachments": []
+}

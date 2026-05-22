@@ -1,0 +1,27 @@
+{
+  "FromName": "Acme Newsletter",
+  "From": "newsletter@updates.acme-marketing.com",
+  "FromFull": { "Email": "newsletter@updates.acme-marketing.com", "Name": "Acme Newsletter" },
+  "To": "maria.gorskikh1@gmail.com",
+  "ToFull": [{ "Email": "maria.gorskikh1@gmail.com", "Name": "" }],
+  "Cc": "",
+  "CcFull": [],
+  "Bcc": "",
+  "BccFull": [],
+  "OriginalRecipient": "maria.gorskikh1@gmail.com",
+  "Subject": "Weekly newsletter: 5 productivity tips you can't miss",
+  "MessageID": "01HQ-DEMO-MARKETING",
+  "ReplyTo": "noreply@acme-marketing.com",
+  "MailboxHash": "",
+  "Date": "Thu, 22 May 2026 09:00:00 -0400",
+  "TextBody": "Hi there!\n\nIt's our weekly newsletter packed with productivity tips, exclusive deals, and inspiration. Don't miss this week's featured content.\n\nClick here to read more.\n\nIf you no longer wish to receive these emails, please unsubscribe.\n\n— The Acme Team",
+  "HtmlBody": "<p>Hi there!</p><p>Newsletter content here.</p><p><a href=\"https://example.com/unsubscribe\">unsubscribe</a></p>",
+  "StrippedTextReply": "",
+  "Tag": "",
+  "Headers": [
+    { "Name": "Message-ID", "Value": "<news-01@updates.acme-marketing.com>" },
+    { "Name": "List-Unsubscribe", "Value": "<mailto:unsub@acme.com>" },
+    { "Name": "Authentication-Results", "Value": "spf=pass dkim=pass dmarc=pass" }
+  ],
+  "Attachments": []
+}

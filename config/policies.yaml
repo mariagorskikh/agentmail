@@ -1,0 +1,49 @@
+policies:
+  - name: phishing-quarantine
+    when:
+      trust: hostile
+    then:
+      force_lane: 1
+
+  - name: vip-always-escalate
+    when:
+      from_trust_level: vip
+    then:
+      force_lane: 5
+      reason: "VIP sender - always escalate to human"
+
+  - name: financial-keywords-escalate
+    when:
+      body_contains_any: [wire transfer, invoice paid, account closure, password reset, security alert]
+    then:
+      force_lane: 5
+      reason: "Financial or security-sensitive content"
+
+  - name: marketing-auto-file
+    when:
+      sender_class: marketing
+    then:
+      force_lane: 2
+
+  - name: cold-outreach-file
+    when:
+      sender_class: cold_outreach
+    then:
+      force_lane: 2
+
+  - name: out-of-office-autoreply
+    when:
+      user_status: ooo
+      sender_class: human
+    then:
+      force_lane: 3
+      auto_action: send_ooo_reply
+
+limits:
+  max_recipients_per_send: 5
+  max_send_to_new_recipient_per_day: 3
+  forbidden_recipients:
+    - "*@example.com"
+  required_human_review_if:
+    - body_contains_any: [legal, contract, termination, lawsuit]
+    - money_amount_gte_cents: 10000
