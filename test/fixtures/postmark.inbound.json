@@ -1,0 +1,28 @@
+{
+  "FromName": "Sarah Chen",
+  "From": "sarah@example-company.com",
+  "FromFull": { "Email": "sarah@example-company.com", "Name": "Sarah Chen" },
+  "To": "maria.gorskikh1@gmail.com",
+  "ToFull": [{ "Email": "maria.gorskikh1@gmail.com", "Name": "" }],
+  "Cc": "",
+  "CcFull": [],
+  "Bcc": "",
+  "BccFull": [],
+  "OriginalRecipient": "maria.gorskikh1@gmail.com",
+  "Subject": "Re: project proposal",
+  "MessageID": "01HQ-DEMO-HUMAN-REPLY",
+  "ReplyTo": "",
+  "MailboxHash": "",
+  "Date": "Thu, 22 May 2026 14:23:00 -0400",
+  "TextBody": "Thanks for sending the proposal — it looks really good. One question: can you confirm the project will start the second week of June, not the first? I want to make sure we have time to onboard the new team member.\n\nLet me know what you think.\n\nBest,\nSarah",
+  "HtmlBody": "<p>Thanks for sending the proposal — it looks really good. One question: can you confirm the project will start the second week of June, not the first?</p>",
+  "StrippedTextReply": "Thanks for sending the proposal — it looks really good.",
+  "Tag": "",
+  "Headers": [
+    { "Name": "Message-ID", "Value": "<CABc-human-reply@mail.example-company.com>" },
+    { "Name": "In-Reply-To", "Value": "<CADxyz-original@mail.yourdomain.com>" },
+    { "Name": "References", "Value": "<CADxyz-original@mail.yourdomain.com>" },
+    { "Name": "Authentication-Results", "Value": "spf=pass dkim=pass dmarc=pass" }
+  ],
+  "Attachments": []
+}
