@@ -1,12 +1,15 @@
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import cors from '@fastify/cors';
 import staticPlugin from '@fastify/static';
 import Fastify from 'fastify';
+import { registerAgentRoutes } from './api/agents.routes.js';
 import { registerAuditRoutes } from './api/audit.routes.js';
 import { registerBearerAuth } from './api/auth.js';
 import { registerDraftRoutes } from './api/drafts.routes.js';
 import { registerMessageRoutes } from './api/messages.routes.js';
 import { registerThreadRoutes } from './api/threads.routes.js';
+import { registerWellKnownRoutes } from './api/wellknown.routes.js';
 import { registerPostmarkRoutes } from './edge/postmark.controller.js';
 import { syncPoliciesToDb } from './policy/rules.js';
 import { sql } from './shared/db.js';
@@ -53,13 +56,22 @@ async function bootstrap(): Promise<void> {
   registerBearerAuth(app);
 
   app.get('/healthz', async () => ({ ok: true, ts: Date.now() }));
-  app.get('/', async (_req, reply) => reply.sendFile('index.html'));
+  app.get('/', async (_req, reply) => reply.sendFile('landing.html'));
+  app.get('/inbox', async (_req, reply) => reply.sendFile('inbox.html'));
+
+  // Serve SKILL.md from the repo root so external agents can fetch it.
+  app.get('/SKILL.md', async (_req, reply) => {
+    const text = await readFile(resolve(process.cwd(), 'SKILL.md'), 'utf8');
+    return reply.type('text/markdown; charset=utf-8').send(text);
+  });
 
   await registerPostmarkRoutes(app);
   await registerThreadRoutes(app);
   await registerDraftRoutes(app);
   await registerMessageRoutes(app);
   await registerAuditRoutes(app);
+  await registerWellKnownRoutes(app);
+  await registerAgentRoutes(app);
 
   await app.listen({ host: '0.0.0.0', port: env.PORT });
   logger.info({ port: env.PORT }, 'server ready');

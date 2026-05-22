@@ -11,11 +11,13 @@ export function requireBearer(req: FastifyRequest): boolean {
 export function registerBearerAuth(app: FastifyInstance): void {
   app.addHook('preHandler', async (req, reply) => {
     // Allow webhook + healthz + setup; everything else under /api needs Bearer
+    // (except /api/v1/agent/* which authenticates via HMAC inside the plugin).
     const url = req.url.split('?')[0] ?? '';
     if (
       url.startsWith('/webhooks/') ||
       url === '/healthz' ||
       url === '/' ||
+      url.startsWith('/api/v1/agent/') ||
       !url.startsWith('/api/')
     ) {
       return;

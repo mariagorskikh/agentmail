@@ -76,11 +76,12 @@ export async function ingestOne(payload: PostmarkInbound): Promise<{
     });
     threadId = thread.threadId;
 
+    const agentId = (payload as unknown as { __agent_id?: string }).__agent_id ?? null;
     await tx`
       INSERT INTO messages (
         id, thread_id, direction, message_id_hdr, in_reply_to, references_hdr,
         from_email, from_name, to_emails, cc_emails, bcc_emails,
-        subject, text_body, html_body, raw_headers, auth_results, received_at
+        subject, text_body, html_body, raw_headers, auth_results, received_at, agent_id
       ) VALUES (
         ${messageId},
         ${threadId},
@@ -98,7 +99,8 @@ export async function ingestOne(payload: PostmarkInbound): Promise<{
         ${parsed.htmlBody},
         ${tx.json(parsed.rawHeaders)},
         ${tx.json(parsed.authResults)},
-        ${parsed.receivedAt}
+        ${parsed.receivedAt},
+        ${agentId}
       )
     `;
 
