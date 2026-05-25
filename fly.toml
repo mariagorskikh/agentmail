@@ -32,16 +32,20 @@ primary_region = "ord"
 
 [deploy]
   # Runs once per release before new machines take traffic.
-  release_command = "tsx scripts/migrate.ts"
+  # Args are appended after the image ENTRYPOINT (`npx tsx`), so this expands
+  # to `npx tsx scripts/migrate.ts`.
+  release_command = "scripts/migrate.ts"
 
 [env]
   NODE_ENV = "production"
   PORT     = "3000"
 
 # Two process groups share the same image; the command differs.
+# Each value is appended after the Dockerfile ENTRYPOINT (`npx tsx`), so
+# `app` expands to `npx tsx src/server.ts`. Do NOT prefix with `tsx` here.
 [processes]
-  app    = "tsx src/server.ts"
-  worker = "tsx src/worker.ts"
+  app    = "src/server.ts"
+  worker = "src/worker.ts"
 
 # Only the `app` process serves HTTP.
 [[services]]
