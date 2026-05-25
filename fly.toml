@@ -1,0 +1,84 @@
+# Fly.io configuration for AgentMail.
+#
+# Usage (first-time setup):
+#   1. fly launch --copy-config --no-deploy
+#        # accept the existing app name or rename it. Fly will detect the
+#        # Dockerfile and create a new app using this file.
+#   2. fly postgres create --name agentmail-db --region ord
+#      fly postgres attach agentmail-db --app <your-app>
+#        # this sets DATABASE_URL as a secret automatically.
+#   3. fly redis create --name agentmail-redis --region ord
+#      # then copy the connection string and:
+#      fly secrets set REDIS_URL="redis://..."
+#   4. fly secrets set \
+#        API_TOKEN="..." \
+#        OWNER_EMAIL="you@yourdomain.com" \
+#        OWNER_NAME="Your Name" \
+#        OWNER_PASSWORD="..." \
+#        ANTHROPIC_API_KEY="sk-ant-..." \
+#        POSTMARK_SERVER_TOKEN="..." \
+#        POSTMARK_WEBHOOK_TOKEN="..." \
+#        POSTMARK_INBOUND_EMAIL="hash@inbound.postmarkapp.com"
+#   5. fly deploy
+#
+# After deploy, point Postmark's inbound webhook URL at:
+#   https://<your-app>.fly.dev/webhooks/postmark/inbound
+
+app           = "agentmail"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  # Runs once per release before new machines take traffic.
+  release_command = "tsx scripts/migrate.ts"
+
+[env]
+  NODE_ENV = "production"
+  PORT     = "3000"
+
+# Two process groups share the same image; the command differs.
+[processes]
+  app    = "tsx src/server.ts"
+  worker = "tsx src/worker.ts"
+
+# Only the `app` process serves HTTP.
+[[services]]
+  processes     = ["app"]
+  protocol      = "tcp"
+  internal_port = 3000
+  # The worker must keep running, so do NOT auto-stop the app machine either
+  # (auto-stopping the app would also confuse the always-on worker setup).
+  auto_stop_machines  = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type       = "connections"
+    hard_limit = 200
+    soft_limit = 150
+
+  [[services.http_checks]]
+    interval     = "15s"
+    timeout      = "5s"
+    grace_period = "20s"
+    method       = "get"
+    path         = "/healthz"
+
+# 1 shared CPU / 512MB is enough for both processes individually.
+[[vm]]
+  size      = "shared-cpu-1x"
+  memory    = "512mb"
+  cpu_kind  = "shared"
+  cpus      = 1
+  processes = ["app", "worker"]

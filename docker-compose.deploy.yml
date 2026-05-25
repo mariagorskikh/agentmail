@@ -1,0 +1,93 @@
+# Production-flavored docker compose stack for AgentMail.
+#
+# Usage:
+#   cp .env.example .env       # then edit values
+#   docker compose -f docker-compose.deploy.yml build
+#   docker compose -f docker-compose.deploy.yml run --rm migrate
+#   docker compose -f docker-compose.deploy.yml up -d
+#
+# This file is intentionally separate from the dev `docker-compose.yml`
+# (which only brings up Postgres + Redis for local `npm run dev`).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: agentmail
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d agentmail"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agentmail:latest
+    restart: "no"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/agentmail
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["scripts/migrate.ts"]
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agentmail:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/agentmail
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["src/server.ts"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agentmail:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/agentmail
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["src/worker.ts"]
+
+volumes:
+  pgdata:
+  redisdata:
