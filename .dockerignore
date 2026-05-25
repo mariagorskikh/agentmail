@@ -1,0 +1,23 @@
+# Keep web/ and sdk/ — the runtime image needs them.
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+data
+*.log
+coverage
+.DS_Store
+dump.rdb
+test
+.next
+web/.next
+web/node_modules
+README.md
+FUTURE_WORK.md
+DEPLOY.md
+AGENT_MAILBOX_SPEC.md
+biome.json
+vitest.config.ts

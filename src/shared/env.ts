@@ -33,6 +33,7 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(3000),
   WEB_PORT: z.coerce.number().default(3001),
   API_TOKEN: z.string().min(8),
+  OWNER_PASSWORD: z.string().default(''),
 
   OWNER_EMAIL: z.string().email(),
   OWNER_NAME: z.string().min(1),

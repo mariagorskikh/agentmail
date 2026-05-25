@@ -17,6 +17,7 @@ export function registerBearerAuth(app: FastifyInstance): void {
       url.startsWith('/webhooks/') ||
       url === '/healthz' ||
       url === '/' ||
+      url === '/api/login' ||
       url.startsWith('/api/v1/agent/') ||
       !url.startsWith('/api/')
     ) {

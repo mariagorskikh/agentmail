@@ -7,6 +7,7 @@ import { registerAgentRoutes } from './api/agents.routes.js';
 import { registerAuditRoutes } from './api/audit.routes.js';
 import { registerBearerAuth } from './api/auth.js';
 import { registerDraftRoutes } from './api/drafts.routes.js';
+import { registerLoginRoutes } from './api/login.routes.js';
 import { registerMessageRoutes } from './api/messages.routes.js';
 import { registerThreadRoutes } from './api/threads.routes.js';
 import { registerWellKnownRoutes } from './api/wellknown.routes.js';
@@ -66,6 +67,7 @@ async function bootstrap(): Promise<void> {
   });
 
   await registerPostmarkRoutes(app);
+  await registerLoginRoutes(app);
   await registerThreadRoutes(app);
   await registerDraftRoutes(app);
   await registerMessageRoutes(app);
