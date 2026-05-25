@@ -78,7 +78,6 @@ function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (k === 'class') el.className = v;
-    else if (k === 'html') el.innerHTML = v;
     else if (k === 'text') el.textContent = v;
     else if (k.startsWith('on') && typeof v === 'function') {
       el.addEventListener(k.slice(2).toLowerCase(), v);
@@ -403,7 +402,7 @@ function startCountdown(draftId, sendAt) {
 
 function render() {
   const root = document.getElementById('root');
-  root.innerHTML = '';
+  root.replaceChildren();
   if (!state.token) {
     root.appendChild(renderLogin());
     return;
